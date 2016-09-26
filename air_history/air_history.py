@@ -16,14 +16,13 @@ from conn_psql import conn_psql
 
 max_request = 3
 max_time = 3
-message = []
 create_time = datetime.datetime.now()
 req_url = requests.session()
 req_url.mount('http://', HTTPAdapter(max_retries=max_request))
 req_url.mount('https://', HTTPAdapter(max_retries=max_request))
 
 
-def crawl_html(url, fail_list):
+def crawl_html(url, fail_list, message):
     try:
         content = req_url.get(url)
         soup = bs(content.text, 'lxml')
@@ -48,28 +47,33 @@ def crawl_html(url, fail_list):
         print e
 
 if __name__ == "__main__":
-    message = {"start":'', "end": '', 'fail_url': ''}
+    message = {"start":'', "end": '', 'fail_url': '', 'fail_insert': []}
     start = str(datetime.datetime.now())
     message["start"] = start
     url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp"
     url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp?city=&startdate=&enddate=&page={0}"
     url_queue = Queue.Queue()
     fail_list = []
-    crawler.get_url(url, url_base=url_base, url_queue=url_queue)
-    try:
-        crawl_num = int(sys.argv[1])
-    except:
-        crawl_num = 50
-    _st = time.time()
-    wm = crawler.WorkManager(crawl_num)
-    for i in range(url_queue.qsize()):
-        wm.add_crawl(crawl_html, url_queue.get(), fail_list)
-    wm.start()
-    wm.wait_for_complete()
-    end = str(datetime.datetime.now())
-    message["end"] = end
-    if len(fail_list) != 0:
-        message["fail_url"] = fail_url
-    print message
-    send_mail("环保部城市空气质量日报历史", ','.join(message))
-    print time.time() - _st
+    s = crawler.get_url(url, url_base=url_base, url_queue=url_queue)
+    if not s:
+        send_mail("环保部城市空气质量日报历史", "请求失败！")
+    else:
+        try:
+            crawl_num = int(sys.argv[1])
+        except:
+            crawl_num = 50
+        _st = time.time()
+        wm = crawler.WorkManager(crawl_num)
+        for i in range(url_queue.qsize()):
+            wm.add_crawl(crawl_html, url_queue.get(), fail_list, message['fail_insert'])
+        wm.start()
+        wm.wait_for_complete()
+        end = str(datetime.datetime.now())
+        message["end"] = end
+        if len(fail_list) != 0:
+            message["fail_url"] = fail_url
+        print message
+        data = "start at: %s\n end at: %s\n fail_url: %s\n fail_insert: %s" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
+        send_mail("环保部城市空气质量日报历史", data)
+        print data
+        print time.time() - _st

@@ -22,6 +22,7 @@ def get_url(url, *args, **kwds):
         return True
     except Exception, e:
         print e
+        return False
 
 
 class CrawlWork(threading.Thread):
