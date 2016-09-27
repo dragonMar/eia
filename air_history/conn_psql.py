@@ -4,17 +4,20 @@
 
 import psycopg2
 from mail import send_mail
+import traceback
 
 
 
-def conn_psql(sql, message):
+def conn_psql(sqls, message):
     try:
         conn = psycopg2.connect(database="epbdc", user="deploy", password="Deploy123$", host="127.0.0.1", port="5432")
         cur = conn.cursor()
-        cur.execute(sql)
+        for sql in sqls:
+            cur.execute(sql)
         conn.commit()
     except Exception, e:
-        message.append(e.message)
+        message.append(traceback.format_exc())
+        print e
     finally:
         conn.close()
 

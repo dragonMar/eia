@@ -30,15 +30,16 @@ def crawl_html(url, fail_list, message):
         trs = table.findAll("tr", {"style": "height:30px;"})[2:]
         for tr in trs:
             tds = tr.findAll("td")
-            sql = "INSERT INTO air_history(city, pubtime, api, level, pollution, status, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
+            aqi = tds[3].text.replace('&nbsp;', '').strip()   # 如果aqi非数字类型 将其赋值为0
+            if aqi == '':
+                aqi = 0
+            sql = "INSERT INTO air_daily(city, pubtime, aqi, level, pollution) values ('%s', '%s', '%s', '%s', '%s')" % \
             (\
             tds[1].text.replace('&nbsp;', '').strip(),\
             tds[2].text.replace('&nbsp;', '').strip(),\
-            tds[3].text.replace('&nbsp;', '').strip(),\
+            aqi,\
             tds[4].text.replace('&nbsp;', '').strip(),\
-            tds[5].text.replace('&nbsp;', '').strip(),\
-            tds[6].text.replace('&nbsp;', '').strip(),\
-            create_time \
+            tds[5].text.replace('&nbsp;', '').strip()\
             )
             sqls.append(sql)
             print sql
@@ -51,13 +52,15 @@ def crawl_html(url, fail_list, message):
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
     start = str(datetime.datetime.now())
+    today = datetime.date.today()
+    start_day = today - datetime.timedelta(days=1)
     message["start"] = start
-    url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp"
-    url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp?city=&startdate=&enddate=&page={0}"
+    url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s" % (start_day, start_day)
+    url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s&page={0}" % (start_day, start_day)
     url_queue = Queue.Queue()
     s = crawler.get_url(url, url_base=url_base, url_queue=url_queue)
     if not s:
-        send_mail("环保部城市空气质量日报历史", "请求失败！")
+        send_mail("环保部城市小时空气质量日报", "请求失败！")
     else:
         try:
             crawl_num = int(sys.argv[1])
@@ -73,4 +76,4 @@ if __name__ == "__main__":
         data = "start at: %s <br> end at: %s <br> fail_url: %s <br> fail_insert: %s <br>" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
         if len(message["fail_url"])==0 and len(message["fail_insert"])==0:
             data = data + "success!"
-        send_mail("环保部城市空气质量日报历史", data)
+        send_mail("环保部城市小时空气质量日报", data)
