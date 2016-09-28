@@ -43,7 +43,7 @@ def crawl_html(url, fail_list, message):
                       )
                 sqls.append(sql)
                 print sql
-            conn_psql(sqls, message)
+            conn_psql(sqls, message, url)
         else:
             content.raise_for_status()
     except Exception, e:

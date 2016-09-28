@@ -8,7 +8,7 @@ import traceback
 
 
 
-def conn_psql(sqls, message):
+def conn_psql(sqls, message, url):
     try:
         conn = psycopg2.connect(database="epbdc", user="deploy", password="Deploy123$", host="127.0.0.1", port="5432")
         cur = conn.cursor()
@@ -16,6 +16,7 @@ def conn_psql(sqls, message):
             cur.execute(sql)
         conn.commit()
     except Exception, e:
+        message.append(url)
         message.append(traceback.format_exc())
         print e
     finally:
