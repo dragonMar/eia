@@ -24,6 +24,7 @@ req_url.mount('http://', HTTPAdapter(max_retries=max_request))
 def crawl_html(url, fail_list, message):
     try:
         sqls = []
+        t = datetime.datetime.now()
         content = req_url.get(url, timeout=max_timeout)
         if content.status_code == 200:
             soup = bs(content.text, 'lxml')
@@ -42,14 +43,14 @@ def crawl_html(url, fail_list, message):
                        create_time \
                       )
                 sqls.append(sql)
-                print sql
             conn_psql(sqls, message, url)
+            print url, t
         else:
             content.raise_for_status()
     except Exception, e:
         fail_list.append(url)
         fail_list.append(traceback.format_exc())
-        print e
+        print url, e, t
 
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
@@ -65,7 +66,7 @@ if __name__ == "__main__":
         try:
             crawl_num = int(sys.argv[1])
         except:
-            crawl_num = 50
+            crawl_num = 10
         wm = crawler.WorkManager(crawl_num)
         for i in range(url_queue.qsize()):
             wm.add_crawl(crawl_html, url_queue.get(), message["fail_url"], message['fail_insert'])

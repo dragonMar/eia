@@ -47,19 +47,19 @@ air_hour_sql = "create table air_hour(\
 epa_area_sql = "create table epa_area(\
         id serial NOT NULL, code character varying(20),\
         epa_name character varying(20), area character varying(50),\
-        size integer, objects character varying(50), kinds character varying(20),\
+        size float, objects character varying(50), kinds character varying(20),\
         level character varying(20), set_date timestamp, chargedby character varying(20),\
         create_time timestamp)"
 limit_goods_sql =  "create table limit_goods(\
         id serial NOT NULL, year integer NOT NULL, batch integer,\
-        approve_date timestamp, import_unit character varying(20),\
-        manu_unit character varying(20), goods_code character varying(50), \
+        approve_date timestamp, import_unit character varying(50),\
+        manu_unit character varying(50), goods_code character varying(100), \
         goods_name character varying(50), approve_amount integer,\
         approve_port character varying(20),create_time timestamp)"
 auto_goods_sql = "create table auto_goods(\
         id serial NOT NULL, batch integer NOT NULL, approve_date timestamp,\
-        import_unit character varying(30), manu_unit character varying(30),\
-        goods_code character varying(50), goods_name character varying(20),\
+        import_unit character varying(50), manu_unit character varying(50),\
+        goods_code character varying(100), goods_name character varying(20),\
         approve_amount integer, approve_port character varying(30),\
         create_time timestamp)"
 

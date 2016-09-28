@@ -7,7 +7,7 @@ import psycopg2
 
 def conn_psql(sql):
     try:
-        conn = psycopg2.connect(database="center", user="postgres", password="password", host="127.0.0.1", port="5432")
+        conn = psycopg2.connect(database="epbdc", user="deploy", password="Deploy123$", host="127.0.0.1", port="5432")
         cur = conn.cursor()
         cur.execute(sql)
         conn.commit()
