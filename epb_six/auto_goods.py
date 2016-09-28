@@ -43,33 +43,40 @@ def crawl_html(url, fail_list, message, data):
             trs = soup.findAll("tr", {"name": "white"})
             for tr in trs:
                 tds = tr.findAll("td")
-                city = tds[8].text.replace('&nbsp;', '').strip()
-                if isinstance(city, int):
-                    sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
-                        (\
-                         tds[1].text.replace('&nbsp;', '').strip(),\
-                         tds[2].text.replace('&nbsp;', '').strip(),\
-                         tds[3].text.replace('&nbsp;', '').strip(),\
-                         tds[4].text.replace('&nbsp;', '').strip(),\
-                         (tds[5].text.replace('&nbsp;', '').strip()+','+tds[6].text.replace('&nbsp;', '').strip()),\
-                         tds[7].text.replace('&nbsp;', '').strip(),\
-                         city,\
-                         '无',\
-                         create_time \
-                        )
-                else:
-                    sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
-                        (\
-                         tds[1].text.replace('&nbsp;', '').strip(),\
-                         tds[2].text.replace('&nbsp;', '').strip(),\
-                         tds[3].text.replace('&nbsp;', '').strip(),\
-                         tds[4].text.replace('&nbsp;', '').strip(),\
-                         tds[5].text.replace('&nbsp;', '').strip(),\
-                         tds[6].text.replace('&nbsp;', '').strip(),\
-                         tds[7].text.replace('&nbsp;', '').strip(),\
-                         tds[8].text.replace('&nbsp;', '').strip(),\
-                         create_time \
-                        )
+                da = {}
+                da['batch'] = tds[1].text.replace("&nbsp;","").strip()
+                da['approve_date'] = tds[2].text.replace("&nbsp;","").strip()
+                da['import_unit'] = tds[3].text.replace("&nbsp;","").strip()
+                da['manu_unit'] = tds[4].text.replace("&nbsp;","").strip()
+                da['goods_code'] = tds[5].text.replace("&nbsp;","").strip()
+                da['goods_name'] = tds[6].text.replace("&nbsp;","").strip()
+                da['approve_amount'] = tds[7].text.replace("&nbsp;","").strip()
+                da['approve_port'] = tds[8].text.replace("&nbsp;","").strip()
+                da['create_time'] = create_time
+                try:
+                    da['approve_amount'] = int(da['approve_amount'])
+                    if da['approve_amount']>=1000000000:
+                        da['goods_code'] = da['goods_code'] + ',' + da['goods_name'] + ',' + str(da['approve_amount'])
+                        da['approve_amount'] = 0
+                        da['goods_name'] = ''
+                        if da['approve_port']>=1000000000:
+                            da['goods_code'] = da['goods_code'] + ',' + da['approve_port']
+                            da['approve_port'] = ''
+                except Exception, e:
+                    if da['approve_amount'] == '':
+                        da['approve_amount'] = 0
+                    else:
+                        if len(da['approve_amount'])>=3:
+                            da['goods_code'] = da['goods_code'] + ',' + da['goods_name']
+                            da['goods_name'] = da['approve_amount']
+                            da['approve_amount'] = da['approve_port']
+                            da['approve_port'] = ''
+                        else:
+                            tmp = da['approve_amount']
+                            da['approve_amount'] = da['approve_port']
+                            da['approve_port'] = tmp
+                sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
+                    (da['batch'], da['approve_date'], da['import_unit'], da['manu_unit'], da['goods_code'], da['goods_name'], da['approve_amount'], da['approve_port'], da['create_time'])
                 sqls.append(sql)
             conn_psql(sqls, message, data)
             print data, t
@@ -83,13 +90,10 @@ def crawl_html(url, fail_list, message, data):
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
     start = str(datetime.datetime.now())
-    today = datetime.date.today()
-    start_day = today - datetime.timedelta(days=1)
     message["start"] = start
     url_count = "http://datacenter.mep.gov.cn/main/template-view.action?templateId_=4028801b29e888e70129e9b93c3e000b"
     url = "http://datacenter.mep.gov.cn/main/template-view.action"
     s = get_num(url_count)
-    print s
     if not s:
         send_mail("限制类固体废物进口名单", "请求失败！")
     else:
@@ -98,7 +102,7 @@ if __name__ == "__main__":
         except:
             crawl_num = 10
         wm = crawler.WorkManager(crawl_num)
-        for i in range(1, s+1):
+        for i in range(1,s+1):
             pag = {"templateId_": "4028801b29e888e70129e9b93c3e000b",\
                    "page.pageNo": i, "dataSource": "${dataSource}"}
             wm.add_crawl(crawl_html, url, message["fail_url"], message['fail_insert'], pag)
