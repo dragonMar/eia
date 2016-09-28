@@ -43,18 +43,33 @@ def crawl_html(url, fail_list, message, data):
             trs = soup.findAll("tr", {"name": "white"})
             for tr in trs:
                 tds = tr.findAll("td")
-                sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
-                    (\
-                     tds[1].text.replace('&nbsp;', '').strip(),\
-                     tds[2].text.replace('&nbsp;', '').strip(),\
-                     tds[3].text.replace('&nbsp;', '').strip(),\
-                     tds[4].text.replace('&nbsp;', '').strip(),\
-                     tds[5].text.replace('&nbsp;', '').strip(),\
-                     tds[6].text.replace('&nbsp;', '').strip(),\
-                     tds[7].text.replace('&nbsp;', '').strip(),\
-                     tds[8].text.replace('&nbsp;', '').strip(),\
-                     create_time \
-                    )
+                city = tds[8].text.replace('&nbsp;', '').strip()
+                if isinstance(city, int):
+                    sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
+                        (\
+                         tds[1].text.replace('&nbsp;', '').strip(),\
+                         tds[2].text.replace('&nbsp;', '').strip(),\
+                         tds[3].text.replace('&nbsp;', '').strip(),\
+                         tds[4].text.replace('&nbsp;', '').strip(),\
+                         (tds[5].text.replace('&nbsp;', '').strip()+','+tds[6].text.replace('&nbsp;', '').strip()),\
+                         tds[7].text.replace('&nbsp;', '').strip(),\
+                         city,\
+                         '无',\
+                         create_time \
+                        )
+                else:
+                    sql = "INSERT INTO auto_goods(batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
+                        (\
+                         tds[1].text.replace('&nbsp;', '').strip(),\
+                         tds[2].text.replace('&nbsp;', '').strip(),\
+                         tds[3].text.replace('&nbsp;', '').strip(),\
+                         tds[4].text.replace('&nbsp;', '').strip(),\
+                         tds[5].text.replace('&nbsp;', '').strip(),\
+                         tds[6].text.replace('&nbsp;', '').strip(),\
+                         tds[7].text.replace('&nbsp;', '').strip(),\
+                         tds[8].text.replace('&nbsp;', '').strip(),\
+                         create_time \
+                        )
                 sqls.append(sql)
             conn_psql(sqls, message, data)
             print data, t
