@@ -11,7 +11,7 @@ import traceback
 from mail import send_mail
 from bs4 import BeautifulSoup as bs
 from requests.adapters import HTTPAdapter
-from conn_psql import conn_psql
+from conn_psql import conn_psql, get_data
 
 
 max_timeout = 120
@@ -55,11 +55,17 @@ def crawl_html(url, fail_list, message):
 
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
-    today = datetime.date.today()
-    start_day = today - datetime.timedelta(days=1)
+    sql = 'select pubtime from air_daily order by pubtime desc limit 1'
+    t = get_data(sql, message['fail_insert'])
+    if t is None:
+        start_day = '2014-01-01'
+    else:
+        t = t[0] + datetime.timedelta(days=1)
+        start_day = t.strftime("%Y-%m-%d")
+    end_day = (datetime.date.today()).strftime("%Y-%m-%d")
     message["start"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s" % (start_day, start_day)
-    url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s&page={0}" % (start_day, start_day)
+    url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s" % (start_day, end_day)
+    url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy.jsp?city=&startdate=%s&enddate=%s&page={0}" % (start_day, end_day)
     url_queue = Queue.Queue()
     s = crawler.get_url(url, url_base=url_base, url_queue=url_queue)
     if not s:
