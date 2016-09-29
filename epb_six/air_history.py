@@ -55,7 +55,7 @@ def crawl_html(url, fail_list, message):
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
     start = str(datetime.datetime.now())
-    message["start"] = start
+    message["start"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     url = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp"
     url_base = "http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp?city=&startdate=&enddate=&page={0}"
     url_queue = Queue.Queue()
@@ -72,8 +72,7 @@ if __name__ == "__main__":
             wm.add_crawl(crawl_html, url_queue.get(), message["fail_url"], message['fail_insert'])
         wm.start()
         wm.wait_for_complete()
-        end = str(datetime.datetime.now())
-        message["end"] = end
+        message["end"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = "start at: %s <br> end at: %s <br> fail_url: %s <br> fail_insert: %s <br>" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
         if len(message["fail_url"])==0 and len(message["fail_insert"])==0:
             data = data + "success!"

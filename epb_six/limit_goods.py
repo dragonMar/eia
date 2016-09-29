@@ -43,6 +43,10 @@ def crawl_html(url, fail_list, message, data):
             trs = soup.findAll("tr", {"name": "white"})
             for tr in trs:
                 tds = tr.findAll("td")
+                try:
+                    da = int(tds[8].text.replace('&nbsp;', '').strip())
+                except Exception, e:
+                    da = 0
                 sql = "INSERT INTO limit_goods(year, batch, approve_date, import_unit, manu_unit, goods_code, goods_name, approve_amount, approve_port, create_time) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
                     (\
                      tds[1].text.replace('&nbsp;', '').strip(),\
@@ -52,7 +56,7 @@ def crawl_html(url, fail_list, message, data):
                      tds[5].text.replace('&nbsp;', '').strip(),\
                      tds[6].text.replace('&nbsp;', '').strip(),\
                      tds[7].text.replace('&nbsp;', '').strip(),\
-                     tds[8].text.replace('&nbsp;', '').strip(),\
+                     da,\
                      tds[9].text.replace('&nbsp;', '').strip(),\
                      create_time \
                     )
@@ -68,10 +72,7 @@ def crawl_html(url, fail_list, message, data):
 
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
-    start = str(datetime.datetime.now())
-    today = datetime.date.today()
-    start_day = today - datetime.timedelta(days=1)
-    message["start"] = start
+    message["start"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     url_count = "http://datacenter.mep.gov.cn/main/template-view.action?templateId_=4028801b29e9c5610129e9cd378a000a"
     url = "http://datacenter.mep.gov.cn/main/template-view.action"
     s = get_num(url_count)
@@ -90,8 +91,7 @@ if __name__ == "__main__":
             wm.add_crawl(crawl_html, url, message["fail_url"], message['fail_insert'], pag)
         wm.start()
         wm.wait_for_complete()
-        end = str(datetime.datetime.now())
-        message["end"] = end
+        message["end"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = "start at: %s <br> end at: %s <br> fail_url: %s <br> fail_insert: %s <br>" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
         if len(message["fail_url"])==0 and len(message["fail_insert"])==0:
             data = data + "success!"

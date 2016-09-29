@@ -68,10 +68,7 @@ def crawl_html(url, fail_list, message, data):
 
 if __name__ == "__main__":
     message = {"start":'', "end": '', 'fail_url': [], 'fail_insert': []}
-    start = str(datetime.datetime.now())
-    today = datetime.date.today()
-    start_day = today - datetime.timedelta(days=1)
-    message["start"] = start
+    message["start"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     url_count = "http://datacenter.mep.gov.cn/main/template-view.action?templateId_=8ae5e48d2670761801267088e590000b&dataSource="
     url = "http://datacenter.mep.gov.cn/main/template-view.action"
     s = get_num(url_count)
@@ -90,8 +87,7 @@ if __name__ == "__main__":
             wm.add_crawl(crawl_html, url, message["fail_url"], message['fail_insert'], pag)
         wm.start()
         wm.wait_for_complete()
-        end = str(datetime.datetime.now())
-        message["end"] = end
+        message["end"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = "start at: %s <br> end at: %s <br> fail_url: %s <br> fail_insert: %s <br>" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
         if len(message["fail_url"])==0 and len(message["fail_insert"])==0:
             data = data + "success!"
