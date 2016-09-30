@@ -1,5 +1,6 @@
 #!/usr/bin/evn python
 #coding:utf-8
+#author:dragonMar
 
 
 import psycopg2
