@@ -55,7 +55,7 @@ class thread_date(threading.Thread):
             trs = table.findAll("tr", {"name": "white"})
             for tr in trs:
                 tds = tr.findAll("td")
-                sql_string = "INSERT INTO engineer( nid, name, organization, code, type, start_date,\
+                sql = "INSERT INTO engineer( nid, name, organization, code, type, start_date,\
                         stop_date, nvq_code, credit, create_time) VALUES ('%s', '%s', '%s', '%s', '%s',\
                         '%s', '%s', '%s', '%s', '%s')" \
                              % (
@@ -70,7 +70,6 @@ class thread_date(threading.Thread):
                                 tds[8].text.replace("&nbsp;", "").strip(),\
                                 create_time
                              )
-                print sql
                 conn_psql(sql, message)
             self.out_queue.task_done()
 
