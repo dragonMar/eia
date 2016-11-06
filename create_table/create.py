@@ -10,7 +10,7 @@ person_sql = 'create table person(\
        id serial NOT NULL, nid integer,name character varying(20),\
        code character varying(20), orgnization character varying(50),\
        province character varying(20), credit character varying(2000),\
-       create_date date)'
+       create_time date)'
 
 engineer_sql="CREATE TABLE engineer(\
         id serial NOT NULL,nid integer,name character varying(20),\

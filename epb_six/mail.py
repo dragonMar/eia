@@ -12,7 +12,8 @@ EMAIL_HOST_USER='pachong321@163.com'
 EMAIL_HOST_PASSWORD='pachong'
 '''
 
-mailto_list=["526365272@qq.com", "xianglongit@163.com", "dragonmar@163.com"]#此处设置 要接受通知邮件的邮箱地址
+#mailto_list=["526365272@qq.com", "xianglongit@163.com", "dragonmar@163.com"]#此处设置 要接受通知邮件的邮箱地址
+mailto_list=["dragonmar@163.com"]#此处设置 要接受通知邮件的邮箱地址
 mail_host="smtp.163.com"  #设置服务器
 mail_user="pachong321@163.com"    #用户名
 mail_pass="pachong"   #口令
