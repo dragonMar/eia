@@ -36,9 +36,11 @@ class thread_url(threading.Thread):
         while not self.queue.empty():
             try:
                 url = self.queue.get()
+                print url
                 content = self.request_url.get(url, timeout=max_time)
                 self.out_queue.put(content)
             except Exception, e:
+                print e
                 message.append("获取页面信息错误！")
 
 
@@ -50,7 +52,8 @@ class thread_date(threading.Thread):
     def run(self):
         while not self.out_queue.empty():
             content = self.out_queue.get()
-            soup = bs(content.text,"html.parser")
+            #print content
+            soup = bs(content.text,"lxml")
             table = soup.find("table", {"style": "margin: 20px auto 0px auto"})
             trs = table.findAll("tr", {"name": "white"})
             for tr in trs:
@@ -71,6 +74,7 @@ class thread_date(threading.Thread):
                                 create_time
                              )
                 conn_psql(sql, message)
+            #print sql
             self.out_queue.task_done()
 
 
@@ -78,7 +82,7 @@ class thread_date(threading.Thread):
 def get_page(url_count, url_base,queue):
     try:
         content = request_url.get(url_count, timeout=max_time)
-        soup = bs(content.text, "html.parser")
+        soup = bs(content.text, "lxml")
         div = soup.find("div", {"class": "yahoo"})
         a = div.findAll("a")
         page = a[1].get("href")
@@ -88,6 +92,7 @@ def get_page(url_count, url_base,queue):
             url = url_base.format(page)
             queue.put(url)
     except Exception, e:
+        print e
         message.append("获取页码错误！")
 
 

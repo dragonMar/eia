@@ -51,7 +51,6 @@ def crawl_html(url, fail_list, message):
                       )
                 sqls.append(sql)
             conn_psql(sqls, message, url)
-            print url, t
         else:
             content.raise_for_status()
     except Exception, e:
@@ -69,19 +68,29 @@ if __name__ == "__main__":
         t = t[0] + datetime.timedelta(hours=1)
         start_day = t.strftime("%Y-%m-%d %H:%M")
     today = datetime.datetime.now()
-    end_day = today.strftime("%Y-%m-%d")
+    #end_day = today.strftime("%Y-%m-%d")
+    start_day = '2015-10-03 01:00'
+    end_day = '2015-10-07'
     message["start"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     url = "http://datacenter.mep.gov.cn/report/air_daily/airDairyCityHour.jsp?city=&startdate=%s&enddate=%s 00:00" % (start_day, end_day)
     url_base = "http://datacenter.mep.gov.cn/report/air_daily/airDairyCityHour.jsp?city=&startdate=%s&enddate=%s 00:00&page={0}" % (start_day, end_day)
     url_queue = Queue.Queue()
     s = crawler.get_url(url, url_base=url_base, url_queue=url_queue)
+    '''
+    from get_url import get_url
+    urls = get_url()
+    for url in urls:
+        url_queue.put(url)
+    print url_queue.qsize()
+    s = True
+    '''
     if not s:
         send_mail("环保部城市小时空气质量小时报", "请求失败！")
     else:
         try:
             crawl_num = int(sys.argv[1])
         except:
-            crawl_num = 10
+            crawl_num = 5
         wm = crawler.WorkManager(crawl_num)
         for i in range(url_queue.qsize()):
             wm.add_crawl(crawl_html, url_queue.get(), message["fail_url"], message['fail_insert'])

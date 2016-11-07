@@ -39,6 +39,7 @@ class thread_url(threading.Thread):
                 content = self.request_url.get(url, timeout=max_time)
                 self.out_queue.put(content)
             except Exception, e:
+                print e
                 message.append("获取页面错误！")
 
 
@@ -50,12 +51,12 @@ class thread_date(threading.Thread):
     def run(self):
         while not self.out_queue.empty():
             content = self.out_queue.get()
-            soup = bs(content.text,"html.parser")
+            soup = bs(content.text,"lxml")
             table = soup.find("table", {"style": "margin: 20px auto 0px auto"})
             trs = table.findAll("tr", {"name": "white"})
             for tr in trs:
                 tds = tr.findAll("td")
-                sql = "INSERT INTO unit(nid, province, city, org_name, leve, cq_code, a_scope,b_scope, table_scope, valid_date, base_info, cop,phone, credit, create_time) values('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"%(
+                sql = "INSERT INTO unit(nid, province, city, org_name, level, cq_code, a_scope,b_scope, table_scope, valid_date, base_info, cop,phone, credit, create_time) values('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"%(
                         tds[0].text.replace('&nbsp;','').strip(),\
                         tds[1].text.replace('&nbsp;','').strip(),\
                         tds[2].text.replace('&nbsp;','').strip(),\
@@ -80,7 +81,7 @@ class thread_date(threading.Thread):
 def get_page(url_count, url_base,queue):
     try:
         content = request_url.get(url_count, timeout=max_time)
-        soup = bs(content.text, "html.parser")
+        soup = bs(content.text, "lxml")
         div = soup.find("div", {"class": "yahoo"})
         a = div.findAll("a")
         page = a[1].get("href")
@@ -90,6 +91,7 @@ def get_page(url_count, url_base,queue):
             url = url_base.format(page)
             queue.put(url)
     except Exception, e:
+        print e
         message.append("获取页码错误！")
 
 

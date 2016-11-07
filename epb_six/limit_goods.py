@@ -84,7 +84,7 @@ if __name__ == "__main__":
         try:
             crawl_num = int(sys.argv[1])
         except:
-            crawl_num = 10
+            crawl_num = 5
         wm = crawler.WorkManager(crawl_num)
         for i in range(1, s+1):
             pag = {"templateId_": "4028801b29e9c5610129e9cd378a000a",\
