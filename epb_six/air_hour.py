@@ -78,7 +78,7 @@ if __name__ == "__main__":
     s = crawler.get_url(url, url_base=url_base, url_queue=url_queue)
     '''
     from get_url import get_url
-    urls = get_url()
+ (url_queue.get(), message["fail_url"], message["fail_insert"])   urls = get_url()
     for url in urls:
         url_queue.put(url)
     print url_queue.qsize()
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     if not s:
         send_mail("环保部城市小时空气质量小时报", "请求失败！")
     else:
+        """
         try:
             crawl_num = int(sys.argv[1])
         except:
@@ -96,6 +97,9 @@ if __name__ == "__main__":
             wm.add_crawl(crawl_html, url_queue.get(), message["fail_url"], message['fail_insert'])
         wm.start()
         wm.wait_for_complete()
+        """
+        for i in range(url_queue.qsize()):
+            crawl_html(url_queue.get(), message["fail_url"], message["fail_insert"])
         message["end"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = "start at: %s <br> end at: %s <br> fail_url: %s <br> fail_insert: %s <br>" % (message['start'], message['end'], message['fail_url'], ';;'.join(message['fail_insert']))
         if len(message["fail_url"])==0 and len(message["fail_insert"])==0:
